@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Configure Blog Alerts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { 
+      font-family: sans-serif;
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+      #completePopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      padding: 1rem 1.75rem;
+      border-radius: 6px;
+      font-size: 1.25rem;
+      text-align: center;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    #completePopup.show {
+      opacity: 1;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.25rem;
+    }
+    #idStatus {
+      margin-left: 0.5rem;
+      font-style: italic;
+    }
+    .blog-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 1rem;
+    }
+    .blog-list li {
+      display: flex;
+      align-items: flex-start;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .blog-list img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      margin-right: 1rem;
+    }
+    .blog-list div {
+      flex: 1;
+    }
+    .blog-list a {
+      color: #0056b3;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .blog-list p {
+      margin: 0.5rem 0 0;
+      line-height: 1.4;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background: #0056b3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>Configure Blog Alerts</h1>
+
+  <form id="configForm">
+    <label for="telegramId">Telegram ID</label>
+    <div>
+      <input type="text" id="telegramId" name="telegramId" required>
+      <span id="idStatus"></span>
+    </div>
+
+    <button type="submit" id="finishBtn" disabled>Finish</button>
+    <ul class="blog-list" id="blogList"></ul>
+  </form>
+  <div id="completePopup">Done! 😊 , you should receive your selected blogs news!! </div>
+  <script>
+    // -- Injected by Python --
+    const data = [{"blog_rss_link": "https://www.oilandgas360.com/feed/", "summary_of_the_blog": "Investors' news source for original oil and gas news, earnings, analysis, and industry events.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629288.jpg?t=1607696379"}, {"blog_rss_link": "https://shalemag.com/feed/", "summary_of_the_blog": "SHALE Magazine covers the energy industry and offers insights and the latest news.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629660.jpg?t=1604326169"}, {"blog_rss_link": "https://www.mees.com/latest-issue/rss", "summary_of_the_blog": "Delivering authoritative weekly insights into the Middle East and North Africa's oil and gas developments.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5093980.jpg?t=1607694271"}, {"blog_rss_link": "https://egyptoil-gas.com/news/feed/", "summary_of_the_blog": "News provider for Egypt's petroleum industry, with updates on oil, gas, Pemex, and energy reform.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629645.jpg?t=1607082455"}, {"blog_rss_link": "https://uvtsolutions.com/feed/", "summary_of_the_blog": "UVT addresses issues of abandoned oil wells and leads in solutions for eliminating emissions globally.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5363538.jpg?t=1642506205"}, {"blog_rss_link": "https://dicoiltools.wordpress.com/feed/", "summary_of_the_blog": "A leading supplier of oil &amp; gas industry products, offering a range of tools and custom solutions.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5733109.jpg?t=1702289878"}, {"blog_rss_link": "https://pboilandgasmagazine.com/feed/", "summary_of_the_blog": "Focusing on the Permian Basin's oil and gas industry news and business activities.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629636.jpg"}, {"blog_rss_link": "https://oilprice.com/rss/main", "summary_of_the_blog": "Global source for oil and gas pricing and industry trends, covering sectors from crude to renewables.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4773746.jpg?t=1669957883"}, {"blog_rss_link": "https://www.oedigital.com/energy/oil?format=feed&limitstart=&type=rss", "summary_of_the_blog": "News and technology for offshore energy professionals, with details on oil operations and developments.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629140.jpg?t=1607695439"}, {"blog_rss_link": "https://www.energyvoice.com/category/oilandgas/feed/", "summary_of_the_blog": "Delivering the latest industry news and insights across oil, gas, and renewable energy sectors.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629159.jpg?t=1604324478"}, {"blog_rss_link": "https://oilandgasmagazine.com.mx/feed/", "summary_of_the_blog": "Offers news from Mexico's hydrocarbon sector including reforms and policy changes impacting the industry.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629655.jpg?t=1604324167"}, {"blog_rss_link": "https://boereport.com/feed/", "summary_of_the_blog": "A comprehensive source for North American oil &amp; gas news, including well data and industry reports.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629320.jpg?t=1604324530"}, {"blog_rss_link": "https://www.iraq-businessnews.com/category/oil-gas/feed/", "summary_of_the_blog": "News on oil and gas exploration and production in Iraq, coverage on new developments and business opportunities.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4496690.jpg?t=1604324497"}, {"blog_rss_link": "https://www.oilfieldtechnology.com/rss/oilfieldtechnology.xml", "summary_of_the_blog": "Global perspective on upstream oil and gas with technical reports, industry news, and sector analyses.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5302476.jpg?t=1669959070"}, {"blog_rss_link": "https://www.drillingmanual.com/feed/", "summary_of_the_blog": "Focuses on rig workers' training, with guides on various technical topics within the drilling industry.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5259436.jpg?t=1616390961"}, {"blog_rss_link": "https://aogdigital.com/news/latest?format=feed", "summary_of_the_blog": "Covers news relevant to the Asian oil &amp; gas market, focusing on innovation and regional developments.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5287199.jpg?t=1622542618"}, {"blog_rss_link": "https://www.exprodat.com/feed/", "summary_of_the_blog": "GIS and information solutions targeting improved E&P processes in the upstream oil and gas industry.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629237.jpg"}, {"blog_rss_link": "https://oilgasleads.com/feed/", "summary_of_the_blog": "Insights into navigating and selling in the North American oil and gas market, with data-rich resources.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5247326.jpg?t=1614084155"}, {"blog_rss_link": "https://www.enverus.com/feed/", "summary_of_the_blog": "Exploratory industry data and analysis aimed at helping understand and engage the energy market dynamics.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4626908.jpg?t=1612507556"}, {"blog_rss_link": "https://www.theenergylawblog.com/feed/", "summary_of_the_blog": "Oil and gas law updates and analysis dealing with energy exploration, drilling, and production legal issues.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629213.jpg?t=1604325159"}, {"blog_rss_link": "https://www.oilandgaslawyerblog.com/feed/", "summary_of_the_blog": "A legal perspective on oil and gas with insights into leasing trends, law developments, and litigation.", "absolute_image_link_for_blog": "https://imgur.com/NoJZEPG"}, {"blog_rss_link": "https://oilandgas-investments.com/feed/", "summary_of_the_blog": "Shares investment news and opportunities within the oil and gas sectors of North America.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629223.jpg?t=1611062044"}, {"blog_rss_link": "https://www.oilnewskenya.com/feed/", "summary_of_the_blog": "East African oil and gas news, covering the industry's regional development and investment opportunities.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629133.jpg?t=1604325599"}, {"blog_rss_link": "https://pickettoil.com/store/blog/feed/", "summary_of_the_blog": "Discusses industry equipment trends and offers product insights for the oil &amp; gas drilling community.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5002996.jpg?t=1607692122"}, {"blog_rss_link": "https://www.malcysblog.com/feed/", "summary_of_the_blog": "Stock market insights and investment analysis on oil and gas entities by expert Malcolm Graham-Wood.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4626898.jpg?t=1752313689"}, {"blog_rss_link": "https://www.oilholicssynonymous.com/feeds/posts/default?alt=rss", "summary_of_the_blog": "Analytical commentary on global oil markets and price dynamics by industry expert Gaurav Sharma.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4903651.jpg?t=1604325531"}, {"blog_rss_link": "https://www.arescotx.com/feed/", "summary_of_the_blog": "Provides insights into oil and gas investment opportunities and market analytics in Texas.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4826065.jpg?t=1604326815"}, {"blog_rss_link": "https://drillers.com/feed/", "summary_of_the_blog": "Resource for articles on drilling technology, training, and news aimed at industry professionals.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5121672.jpg?t=1663069948"}, {"blog_rss_link": "https://www.oilfutures.co.uk/feeds/posts/default", "summary_of_the_blog": "Focuses on oil market analysis and insights, with articles on trading, market trends, and forecasting.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5238997.jpg?t=1611561999"}, {"blog_rss_link": "https://www.energyjobshop.com/category/articles/feed/", "summary_of_the_blog": "Oilfield job news and insights, helping professionals connect with employment opportunities in oil and gas.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4748527.jpg?t=1604326821"}, {"blog_rss_link": "https://kingoperating.com/feed/", "summary_of_the_blog": "Investment-focused analysis on the oil and gas industry with strategic insights into market ventures.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633623.jpg?t=1752314104"}, {"blog_rss_link": "https://novilabs.com/category/machine-learning-oil-and-gas/feed/", "summary_of_the_blog": "Explores the application of machine learning and data analytics in improving oil and gas operations.", "absolute_image_link_for_blog": "https://novilabs.com/wp-content/uploads/2024/05/Logo_favicon-150x150.png?t=1752314154"}, {"blog_rss_link": "https://rextag.com/blogs/blog.atom", "summary_of_the_blog": "Provides industry data and insights to energy professionals, focusing on oil and gas infrastructure.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5695591.jpg?t=1698071176"}, {"blog_rss_link": "https://blog.onevalor.com/feed/", "summary_of_the_blog": "Offers expertise on the oil and gas industry with outsourcing solutions to improve operational efficiency.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633612.jpg?t=1752314378"}, {"blog_rss_link": "https://news.pivoten.com/blog/rss.xml", "summary_of_the_blog": "Provides advanced oil and gas accounting solutions and shares updates on industry software advancements.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633618.jpg?t=1752314409"}, {"blog_rss_link": "https://www.theenergylawblog.com/articles/energy/louisiana-oil-gas-law/feed/", "summary_of_the_blog": "Legal insights and developments in the energy sector with a focus on Louisiana's oil and gas law.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633606.jpg?t=1752314899"}, {"blog_rss_link": "https://oil-and-gas-career.com/feed/", "summary_of_the_blog": "Career advice and industry insights aimed at fostering a successful workforce in the oil and gas sector.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633613.jpg?t=1752315372"}, {"blog_rss_link": "https://belloil.com/feed/", "summary_of_the_blog": "Insights into best practices and industry developments from a leading oilfield service company.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633598.jpg?t=1752315499"}, {"blog_rss_link": "https://oilandgas2010.blogspot.com/feeds/posts/default", "summary_of_the_blog": "Scientific and educational content related to oil and gas engineering, including industry research.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633603.jpg?t=1752315702"}, {"blog_rss_link": "https://energyandthelaw.com/feed/", "summary_of_the_blog": "Legal commentary and analysis on the energy sector, focusing on legal issues in oil, gas and alternative energy.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4767550.jpg?t=1608700402"}, {"blog_rss_link": "https://gasifymiddleeast.com/feed/", "summary_of_the_blog": "Updates and tips on the oil and gas industry in the UAE and Middle East, focusing on developments and trends.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633617.jpg?t=1752318179"}, {"blog_rss_link": "https://palmergas.com/feed/", "summary_of_the_blog": "Insights into propane and heating solutions, covering topics like tank safety and energy programs in New Hampshire.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633595.jpg?t=1752318262"}, {"blog_rss_link": "https://comanchegas.com/feed/", "summary_of_the_blog": "Details on natural gas fuel management for drilling and completions, serving the US energy sector.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633593.jpg?t=1752319203"}, {"blog_rss_link": "https://www.oilgasdaily.com/oilgasdaily.xml", "summary_of_the_blog": "Daily updates on the global oil and gas news from extraction to market trends and business forecasts.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633605.jpg?t=1752402299"}, {"blog_rss_link": "https://energy-oil-gas.com/feed/", "summary_of_the_blog": "Focused on the issues pertinent to the energy industry and provides the latest news and developments.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5452139.jpg?t=1669958310"}, {"blog_rss_link": "https://economictimes.indiatimes.com/rssfeeds/13358368.cms", "summary_of_the_blog": "Latest oil sector news and updates on BPCL, NRL, LPG, CNG, and ONGC from The Economic Times.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5139919.jpg?t=1752402656"}, {"blog_rss_link": "https://drillingcontractor.org/feed", "summary_of_the_blog": "Covers global drilling operations with technical information on drilling, completions, and the upstream market.", "absolute_image_link_for_blog": "https://i1.feedspot.com/3928297.jpg?t=1664262273"}, {"blog_rss_link": "https://www.thermofisher.com/blog/mining/oil-and-gas/feed/", "summary_of_the_blog": "Technical articles and industry insights focusing on innovations and technologies in oil and gas exploration.", "absolute_image_link_for_blog": "https://i1.feedspot.com/8633600.jpg?t=1752402928"}, {"blog_rss_link": "https://heatexchan.blogspot.com/feeds/posts/default", "summary_of_the_blog": "Insights from an expert in heat transfer technology, with relevance for the oil and gas industry.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5533846.jpg?t=1704195839"}, {"blog_rss_link": "https://www.technicofl.com/feed/", "summary_of_the_blog": "Insights into natural gas and propane industry trends, focusing on wholesale distribution and equipment.", "absolute_image_link_for_blog": "https://i1.feedspot.com/7247889.jpg?t=1707372638"}, {"blog_rss_link": "https://www.orientenergyreview.com/feed/", "summary_of_the_blog": "Coverage of the oil and gas industry news across Africa, with a particular focus on business and technology.", "absolute_image_link_for_blog": "https://i1.feedspot.com/5185612.jpg?t=1604324429"}, {"blog_rss_link": "https://reportingoilandgas.org/feed/", "summary_of_the_blog": "Provides comprehensive updates and analysis on Ghana's oil and gas industry and related developments.", "absolute_image_link_for_blog": "https://i1.feedspot.com/4629185.jpg?t=1604324667"}];
+
+    let users = [];
+    let validUser = null;
+
+    const telegramInput = document.getElementById('telegramId');
+    const idStatus       = document.getElementById('idStatus');
+    const blogList       = document.getElementById('blogList');
+    const finishBtn      = document.getElementById('finishBtn');
+    const form           = document.getElementById('configForm');
+
+    // load known users
+    fetch('users.json')
+      .then(r => r.json())
+      .then(js => users = js)
+      .catch(() => console.error('Couldn’t load users.json'));
+
+    // render blogs with summary
+    data.forEach((entry, idx) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <input type="checkbox" id="blog-${idx}" name="blogs" value="${entry.blog_rss_link}">
+        <img src="${entry.absolute_image_link_for_blog}" alt="">
+        <div>
+          <label for="blog-${idx}">
+            ${new URL(entry.blog_rss_link).hostname.replace(/^www\\./, '')}
+            <a href="${entry.blog_rss_link}" target="_blank" rel="noopener">⤴</a>
+          </label>
+          <p>${entry.summary_of_the_blog}</p>
+        </div>`;
+      blogList.appendChild(li);
+    });
+
+    // toggle Finish btn only when ID valid + ≥1 blog checked
+    function updateFinishState() {
+      const anyChecked = !!document.querySelector('input[name="blogs"]:checked');
+      finishBtn.disabled = !(validUser && anyChecked);
+    }
+
+    // validate on every keystroke
+    telegramInput.addEventListener('input', () => {
+      const idStr = telegramInput.value.trim();
+      validUser = users.find(u => u.telegram_id.toString() === idStr) || null;
+      idStatus.textContent = validUser
+        ? `✔ Hello ${validUser.username}`
+        : '✖ Unknown ID';
+      updateFinishState();
+    });
+
+    blogList.addEventListener('change', updateFinishState);
+    /**
+ * Briefly shows a centered toast message.
+ */
+  function showPopup() {
+    const popup = document.getElementById('completePopup');
+    // add the visible class
+    popup.classList.add('show');
+
+    // after 2s, fade it out
+    setTimeout(() => {
+     popup.classList.remove('show');
+    }, 5000);
+  }
+    // POST back to server on Finish
+    form.addEventListener('submit', evt => {
+      evt.preventDefault();
+      const selected = Array.from(
+        document.querySelectorAll('input[name="blogs"]:checked')
+      ).map(cb => cb.value);
+
+      const picks = data.filter(d => selected.includes(d.blog_rss_link));
+
+      const output = {
+        telegram_id: validUser.telegram_id,
+        username:    validUser.username,
+        selections:  picks
+      };
+
+      fetch('/save-selection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(output)
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json();
+      })
+      .then(js => showPopup())
+      .catch(err => {
+        console.error(err);
+        alert('Failed to save selection on server.');
+      });
+    });
+  </script>
+</body>
+</html>

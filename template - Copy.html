@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Configure Blog Alerts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {{
+      font-family: sans-serif;
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }}
+    form {{
+      display: flex;
+      flex-direction: column;
+    }}
+    label {{
+      margin-top: 1rem;
+      font-weight: bold;
+    }}
+    input[type="text"] {{
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.25rem;
+    }}
+    #idStatus {{
+      margin-left: 0.5rem;
+      font-style: italic;
+    }}
+    .blog-list {{
+      list-style: none;
+      padding: 0;
+      margin-top: 1rem;
+    }}
+    .blog-list li {{
+      display: flex;
+      align-items: flex-start;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+    }}
+    .blog-list img {{
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      margin-right: 1rem;
+    }}
+    .blog-list div {{
+      flex: 1;
+    }}
+    .blog-list a {{
+      color: #0056b3;
+      text-decoration: none;
+      font-weight: bold;
+    }}
+    .blog-list p {{
+      margin: 0.5rem 0 0;
+      line-height: 1.4;
+    }}
+    button {{
+      margin-top: 1.5rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background: #0056b3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }}
+    button:disabled {{
+      background: #aaa;
+      cursor: not-allowed;
+    }}
+  </style>
+</head>
+<body>
+  <h1>Configure Blog Alerts</h1>
+
+  <form id="configForm">
+    <label for="telegramId">Telegram ID</label>
+    <div>
+      <input type="text" id="telegramId" name="telegramId" required>
+      <span id="idStatus"></span>
+    </div>
+
+    <!-- MOVE FINISH BUTTON HERE -->
+    <button type="submit" id="finishBtn" disabled>Finish</button>
+
+    <ul class="blog-list" id="blogList"></ul>
+  </form>
+
+  <script>
+    // -- Injected by Python --
+    const data = {data_json};
+
+    let users = [];
+    let validUser = null;
+
+    const telegramInput = document.getElementById('telegramId');
+    const idStatus       = document.getElementById('idStatus');
+    const blogList       = document.getElementById('blogList');
+    const finishBtn      = document.getElementById('finishBtn');
+    const form           = document.getElementById('configForm');
+
+    // load known users
+    fetch('users.json')
+      .then(r => r.json())
+      .then(js => users = js)
+      .catch(() => console.error('Couldn’t load users.json'));
+
+    // render blogs with summary
+    data.forEach((entry, idx) => {{
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <input type="checkbox" id="blog-${{idx}}" name="blogs" value="${{entry.blog_rss_link}}">
+        <img src="${{entry.absolute_image_link_for_blog}}" alt="">
+        <div>
+          <label for="blog-${{idx}}">
+            ${{new URL(entry.blog_rss_link).hostname.replace(/^www\\./, '')}}
+            <a href="${{entry.blog_rss_link}}" target="_blank" rel="noopener">⤴</a>
+          </label>
+          <p>${{entry.summary_of_the_blog}}</p>
+        </div>`;
+      blogList.appendChild(li);
+    }});
+
+    // toggle Finish btn only when ID valid + ≥1 blog checked
+    function updateFinishState() {{
+      const anyChecked = !!document.querySelector('input[name="blogs"]:checked');
+      finishBtn.disabled = !(validUser && anyChecked);
+    }}
+
+    // validate on every keystroke, compare as string
+    telegramInput.addEventListener('input', () => {{
+      const idStr = telegramInput.value.trim();
+      validUser = users.find(u => u.telegram_id.toString() === idStr) || null;
+      idStatus.textContent = validUser
+        ? `✔ Hello ${{validUser.username}}`
+        : '✖ Unknown ID';
+      updateFinishState();
+    }});
+
+    // re-check whenever a box is toggled
+    blogList.addEventListener('change', updateFinishState);
+
+    // build and download JSON on finish
+    form.addEventListener('submit', evt => {{
+      evt.preventDefault();
+      const selected = Array.from(
+        document.querySelectorAll('input[name="blogs"]:checked')
+      ).map(cb => cb.value);
+
+      const picks = data.filter(d => selected.includes(d.blog_rss_link));
+
+      const output = {{
+        telegram_id: validUser.telegram_id,
+        username:    validUser.username,
+        selections:  picks
+      }};
+
+      const blob = new Blob([JSON.stringify(output, null, 2)], {{ type: 'application/json' }});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'my_blog_selection.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }});
+  </script>
+</body>
+</html>
